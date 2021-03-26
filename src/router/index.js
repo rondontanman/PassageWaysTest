@@ -1,30 +1,38 @@
+// Basic Vue Imports
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
+
+// Okta imports
+import Auth from '@okta/okta-vue';
+
+// Personal imports
+import MeetingDashboard from '@/components/MeetingDashboard';
+
+Vue.use(Auth, {
+  issuer: 'https://bimetics.okta.com/oauth2/default',
+  client_id: '0oad7xrhaTu3JFTVN5d6',
+  redirect_ui: 'https://localhost:5001/implicit/callback',
+  scope: 'openid profile email'
+});
 
 Vue.use(VueRouter);
 
-const routes = [
-  {
-    path: "/",
-    name: "Home",
-    component: Home,
-  },
-  {
-    path: "/about",
-    name: "About",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue"),
-  },
-];
-
-const router = new VueRouter({
-  mode: "history",
-  base: process.env.BASE_URL,
-  routes,
+let router = new Router({
+  mode: 'history',
+  routes: [
+    {
+      path: '/',
+      name: 'MeetingDashboard',
+      component: MeetingDashboard,
+      props: true
+    },
+    {
+      path: '/implicit/callback',
+      component: Auth.handleCallback()
+    },
+  ]
 });
+
+router.beforeEach(Vue.prototype.$auth.authRedirectGuard());
 
 export default router;
